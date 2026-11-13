@@ -82,8 +82,116 @@ button:active{background:#0876a5}
 </div>
 </div>
 
-<script>
+
+
 const API_URL = "https://jarvis-ai.workers.dev/chat";
-</script>
-</body>
-</html>
+
+let voiceEnabled = true;
+let history = JSON.parse(localStorage.getItem("jarvis_history") || "[]");
+
+const chat = document.getElementById("chat");
+const input = document.getElementById("message");
+const statusText = document.getElementById("status");
+
+function addMessage(text, type) {
+  const div = document.createElement("div");
+  div.className = "msg " + type;
+  div.textContent = text;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function speak(text) {
+  if (!voiceEnabled || !("speechSynthesis" in window)) return;
+  speechSynthesis.cancel();
+  const speech = new SpeechSynthesisUtterance(text);
+  speech.lang = "fi-FI";
+  speechSynthesis.speak(speech);
+}
+
+async function sendMessage() {
+  const message = input.value.trim();
+  if (!message) return;
+
+  addMessage(message, "user");
+  input.value = "";
+  statusText.textContent = "JARVIS THINKING...";
+
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message })
+    });
+
+    if (!response.ok) {
+      throw new Error("Server error: " + response.status);
+    }
+
+    const data = await response.json();
+    const reply = data.reply || data.response || data.text;
+
+    if (!reply) throw new Error("AI response was empty");
+
+    addMessage(reply, "bot");
+    history.push({ message, reply });
+    history = history.slice(-30);
+    localStorage.setItem("jarvis_history", JSON.stringify(history));
+
+    speak(reply);
+    statusText.textContent = "JARVIS ONLINE";
+
+  } catch (error) {
+    addMessage("Yhteysvirhe: " + error.message, "bot");
+    statusText.textContent = "CONNECTION ERROR";
+  }
+}
+
+function clearChat() {
+  chat.innerHTML = "";
+  history = [];
+  localStorage.removeItem("jarvis_history");
+}
+
+function toggleSpeech() {
+  voiceEnabled = !voiceEnabled;
+  statusText.textContent = voiceEnabled ? "VOICE ENABLED" : "VOICE DISABLED";
+}
+
+function startVoice() {
+  const Recognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (!Recognition) {
+    addMessage("Puheentunnistus ei ole tuettu tässä selaimessa.", "bot");
+    return;
+  }
+
+  const recognition = new Recognition();
+  recognition.lang = "fi-FI";
+  recognition.onresult = event => {
+    input.value = event.results[0][0].transcript;
+    sendMessage();
+  };
+  recognition.onerror = () => {
+    statusText.textContent = "VOICE ERROR";
+  };
+  recognition.start();
+}
+
+input.addEventListener("keydown", event => {
+  if (event.key === "Enter") sendMessage();
+});
+
+document.getElementById("clock").textContent = new Date().toLocaleString("fi-FI");
+
+setInterval(() => {
+  document.getElementById("clock").textContent =
+    new Date().toLocaleString("fi-FI");
+}, 1000);
+
+history.forEach(item => {
+  addMessage(item.message, "user");
+  addMessage(item.reply, "bot");
+});
+
