@@ -1,356 +1,89 @@
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#050b16">
-<title>JARVIS AI</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JARVIS 2.0</title>
 <style>
 *{box-sizing:border-box}
 body{
- margin:0;background:radial-gradient(circle at center,#102b45,#030711 75%);
- color:#b9eaff;font-family:Arial,sans-serif;
- min-height:100vh;text-align:center;
+ margin:0;background:#030914;color:#d8f5ff;
+ font-family:Arial,sans-serif;min-height:100vh;
+ display:flex;justify-content:center;
 }
-header{
- padding:25px;font-size:28px;letter-spacing:6px;
- color:#55d9ff;text-shadow:0 0 18px #00aaff;
-}
-#status{font-size:11px;letter-spacing:3px;color:#42e6a4}
-#clock{font-size:25px;margin:15px}
+.app{width:100%;max-width:850px;padding:22px}
+header{text-align:center;padding:20px 0}
+h1{letter-spacing:9px;color:#36cfff;text-shadow:0 0 18px #008cff}
+.status{font-size:12px;color:#6de7ff;letter-spacing:3px}
 .reactor{
- width:190px;height:190px;margin:25px auto;
- border:3px solid #31caff;border-radius:50%;
- display:grid;place-items:center;
- box-shadow:0 0 25px #009dff,inset 0 0 30px #008cff;
- animation:pulse 3s infinite;cursor:pointer;
+ width:150px;height:150px;border-radius:50%;
+ border:3px solid #28caff;margin:22px auto;
+ display:flex;align-items:center;justify-content:center;
+ box-shadow:0 0 25px #008cff,inset 0 0 25px #008cff;
+ animation:pulse 3s infinite;
 }
-.core{
- width:125px;height:125px;border:3px solid #9ceaff;
- border-radius:50%;display:grid;place-items:center;
- font-size:38px;color:white;
- box-shadow:0 0 25px #00bfff;
-}
-@keyframes pulse{
- 50%{transform:scale(1.06);box-shadow:0 0 45px #00bfff}
-}
+.reactor span{font-size:35px;color:#7ceaff}
+@keyframes pulse{50%{box-shadow:0 0 45px #008cff,inset 0 0 35px #008cff}}
 .panel{
- margin:15px;padding:16px;
- background:#071626eF;border:1px solid #17618b;
- border-radius:13px;text-align:left;
+ background:#071827;border:1px solid #14516b;
+ border-radius:14px;padding:15px;margin:14px 0;
 }
-h3{text-align:center;letter-spacing:2px;color:#66dfff}
-#chat{height:220px;overflow-y:auto}
-.message{
- padding:10px;margin:8px 0;background:#102b43;
- border-radius:8px;overflow-wrap:anywhere;font-size:14px;
-}
+#chat{height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
+.msg{padding:11px 13px;border-radius:10px;max-width:90%;line-height:1.5;white-space:pre-wrap}
+.user{align-self:flex-end;background:#103b58}
+.bot{align-self:flex-start;background:#09283a;border:1px solid #14516b}
 input{
- padding:13px;background:#06111f;color:white;
- border:1px solid #168bc1;border-radius:8px;
- width:100%;margin:5px 0;outline:none;
+ width:100%;background:#020d18;color:white;
+ border:1px solid #176080;border-radius:9px;
+ padding:14px;font-size:16px;outline:none
 }
 button{
- background:#092c46;color:#aeeaff;
- border:1px solid #28baff;border-radius:8px;
- padding:12px;margin:4px;cursor:pointer;
+ background:#063b59;color:#7ceaff;border:1px solid #1686b5;
+ padding:12px 16px;border-radius:9px;
+ font-size:14px;cursor:pointer
 }
-button:active{background:#07527b}
-.actions{text-align:center}
-.small{font-size:11px;color:#72a9c2;text-align:center}
-ul{padding-left:20px}
-li{padding:7px;overflow-wrap:anywhere}
-footer{padding:25px;color:#477c99;font-size:11px}
+button:active{background:#0876a5}
+.controls{display:flex;gap:8px;margin-top:10px}
+.controls button{flex:1}
+.small{font-size:12px;color:#83aebe}
+#status{color:#59dfff;font-size:13px;margin-top:10px}
 </style>
 </head>
-
 <body>
-
-<header>J.A.R.V.I.S.</header>
-
-<div id="status">● ALL SYSTEMS ONLINE</div>
-<div id="clock">00:00:00</div>
-
-<div class="reactor" onclick="listen()">
- <div class="core">J</div>
-</div>
-
-<div class="small">TAP THE REACTOR TO SPEAK</div>
+<div class="app">
+<header>
+ <div class="status">PERSONAL AI SYSTEM · ONLINE</div>
+ <h1>J.A.R.V.I.S</h1>
+ <div class="small">JUST A RATHER VERY INTELLIGENT SYSTEM</div>
+ <div class="reactor"><span>J</span></div>
+ <div id="status">JARVIS 2.0 READY</div>
+</header>
 
 <div class="panel">
-<h3>AI ASSISTANT TERMINAL</h3>
-
-<div id="chat">
- <div class="message">
- JARVIS: Hello. I am JARVIS, your personal assistant. How can I help?
+ <div class="small">AI CONVERSATION</div>
+ <div id="chat"></div>
+ <input id="message" placeholder="Kirjoita JARVISille..." autocomplete="off">
+ <div class="controls">
+  <button onclick="sendMessage()">SEND</button>
+  <button onclick="startVoice()">🎙 SPEAK</button>
+  <button onclick="clearChat()">CLEAR</button>
+ </div>
+ <div class="controls">
+  <button onclick="toggleSpeech()">🔊 VOICE ON/OFF</button>
  </div>
 </div>
 
-<input id="command" placeholder="Talk to JARVIS or type a command..."
- onkeydown="if(event.key==='Enter')send()">
-
-<div class="actions">
-<button onclick="send()">SEND</button>
-<button onclick="listen()">VOICE</button>
-<button onclick="clearChat()">CLEAR CHAT</button>
-</div>
-</div>
-
 <div class="panel">
-<h3>PERSONAL MEMORY</h3>
-<input id="memoryInput" placeholder="Write something to remember...">
-<div class="actions">
-<button onclick="saveMemory()">SAVE MEMORY</button>
+ <div class="small">SYSTEM INFORMATION</div>
+ <p id="clock">--:--:--</p>
+ <p class="small">AI ENGINE: GEMINI · VERSION 2.0</p>
+ <p class="small">MEMORY: LOCAL BROWSER STORAGE</p>
 </div>
-<div id="memories"></div>
 </div>
-
-<div class="panel">
-<h3>TASK MANAGER</h3>
-<input id="taskInput" placeholder="Enter a task...">
-<div class="actions">
-<button onclick="addTask()">ADD TASK</button>
-</div>
-<ul id="tasks"></ul>
-</div>
-
-<div class="panel">
-<h3>SYSTEM INFORMATION</h3>
-<p>System: JARVIS AI 1.0</p>
-<p>Interface: Online</p>
-<p>Voice: Browser speech engine</p>
-<p>Memory: Local storage</p>
-<p>AI connection: Not connected yet</p>
-</div>
-
-<footer>J.A.R.V.I.S. PERSONAL AI SYSTEM</footer>
 
 <script>
-
-const chat=document.getElementById("chat");
-
-function updateClock(){
- document.getElementById("clock").textContent=
- new Date().toLocaleTimeString();
-}
-setInterval(updateClock,1000);
-updateClock();
-
-function addMessage(sender,text){
- const div=document.createElement("div");
- div.className="message";
- div.textContent=sender+": "+text;
- chat.appendChild(div);
- chat.scrollTop=chat.scrollHeight;
-}
-
-function speak(text){
- if(!("speechSynthesis" in window))return;
- speechSynthesis.cancel();
- const msg=new SpeechSynthesisUtterance(text);
- msg.lang="en-US";
- msg.rate=0.95;
- msg.pitch=0.85;
- speechSynthesis.speak(msg);
-}
-
-function respond(text){
- addMessage("JARVIS",text);
- speak(text);
-}
-
-function send(){
- const input=document.getElementById("command");
- const text=input.value.trim();
- if(!text)return;
- input.value="";
- addMessage("YOU",text);
- processCommand(text);
-}
-
-function processCommand(text){
- const q=text.toLowerCase();
- let answer="I am still learning this command. Type HELP to see what I can do.";
-
-if(q.includes("hello")||q.includes("hi jarvis")||q.includes("hey jarvis")||q.includes("hei jarvis")){
- answer="Hello! JARVIS is online and ready to assist you.";
-}
-else if(q.includes("help")||q.includes("commands")){
- answer="I can tell you the time and date, open websites, search Google, save memories and manage tasks.";
-}
-else if(q.includes("time")||q.includes("kello")){
- answer="The current time is "+new Date().toLocaleTimeString();
-}
-else if(q.includes("date")||q.includes("päivämäärä")){
- answer="Today's date is "+new Date().toLocaleDateString();
-}
-else if(q.includes("your name")||q.includes("who are you")){
- answer="I am JARVIS, your personal digital assistant.";
-}
-else if(q.includes("open youtube")){
- window.open("https://youtube.com","_blank");
- answer="Opening YouTube.";
-}
-else if(q.includes("open google")){
- window.open("https://google.com","_blank");
- answer="Opening Google.";
-}
-else if(q.includes("open github")){
- window.open("https://github.com","_blank");
- answer="Opening GitHub.";
-}
-else if(q.startsWith("search ")){
- const term=text.substring(7).trim();
- window.open("https://www.google.com/search?q="+encodeURIComponent(term),"_blank");
- answer="Searching Google for "+term;
-}
-else if(q.startsWith("remember ")){
- const value=text.substring(9).trim();
- if(value){
-  saveMemoryValue(value);
-  answer="I have saved that in your personal memory.";
- }else{
-  answer="Please tell me what you want me to remember.";
- }
-}
-else if(q.includes("clear tasks")){
- localStorage.removeItem("jarvisTasks");
- renderTasks();
- answer="All tasks have been cleared.";
-}
-else if(q.includes("clear memory")){
- localStorage.removeItem("jarvisMemory");
- renderMemory();
- answer="Your saved local memories have been cleared.";
-}
-
-respond(answer);
-}
-
-function listen(){
- const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;
-
- if(!Recognition){
-  respond("Voice recognition is unavailable. Please use Chrome.");
-  return;
- }
-
- const recognition=new Recognition();
- recognition.lang="en-US";
- recognition.interimResults=false;
-
- document.getElementById("status").textContent="● LISTENING...";
-
- recognition.onresult=function(event){
-  document.getElementById("command").value=event.results[0][0].transcript;
-  document.getElementById("status").textContent="● COMMAND RECEIVED";
-  send();
- };
-
- recognition.onerror=function(){
-  document.getElementById("status").textContent="● VOICE ERROR";
- };
-
- recognition.onend=function(){
-  document.getElementById("status").textContent="● ALL SYSTEMS ONLINE";
- };
-
- recognition.start();
-}
-
-function clearChat(){
- chat.replaceChildren();
- addMessage("JARVIS","Terminal cleared. Ready for your next command.");
-}
-
-function saveMemoryValue(value){
- const data=JSON.parse(localStorage.getItem("jarvisMemory")||"[]");
- data.push(value);
- localStorage.setItem("jarvisMemory",JSON.stringify(data));
- renderMemory();
-}
-
-function saveMemory(){
- const input=document.getElementById("memoryInput");
- const value=input.value.trim();
- if(!value)return;
- saveMemoryValue(value);
- input.value="";
-}
-
-function renderMemory(){
- const data=JSON.parse(localStorage.getItem("jarvisMemory")||"[]");
- const box=document.getElementById("memories");
- box.replaceChildren();
-
- data.forEach((item,index)=>{
-  const div=document.createElement("div");
-  div.className="message";
-  div.textContent=item;
-
-  const btn=document.createElement("button");
-  btn.textContent="DELETE";
-  btn.onclick=()=>{
-   data.splice(index,1);
-   localStorage.setItem("jarvisMemory",JSON.stringify(data));
-   renderMemory();
-  };
-  div.appendChild(btn);
-  box.appendChild(div);
- });
-}
-
-function addTask(){
- const input=document.getElementById("taskInput");
- const value=input.value.trim();
- if(!value)return;
-
- const tasks=JSON.parse(localStorage.getItem("jarvisTasks")||"[]");
- tasks.push({text:value,done:false});
- localStorage.setItem("jarvisTasks",JSON.stringify(tasks));
- input.value="";
- renderTasks();
-}
-
-function renderTasks(){
- const tasks=JSON.parse(localStorage.getItem("jarvisTasks")||"[]");
- const list=document.getElementById("tasks");
- list.replaceChildren();
-
- tasks.forEach((task,index)=>{
-  const li=document.createElement("li");
-  const checkbox=document.createElement("input");
-  checkbox.type="checkbox";
-  checkbox.checked=task.done;
-  checkbox.style.width="auto";
-
-  checkbox.onchange=()=>{
-   tasks[index].done=checkbox.checked;
-   localStorage.setItem("jarvisTasks",JSON.stringify(tasks));
-  };
-
-  li.appendChild(checkbox);
-  li.appendChild(document.createTextNode(" "+task.text));
-
-  const del=document.createElement("button");
-  del.textContent="DELETE";
-  del.onclick=()=>{
-   tasks.splice(index,1);
-   localStorage.setItem("jarvisTasks",JSON.stringify(tasks));
-   renderTasks();
-  };
-
-  li.appendChild(del);
-  list.appendChild(li);
- });
-}
-
-renderMemory();
-renderTasks();
-
+const API_URL = "https://jarvis-ai.workers.dev/chat";
 </script>
 </body>
 </html>
-
