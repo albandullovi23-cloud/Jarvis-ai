@@ -159,6 +159,11 @@ function updateClock(){
 }
 updateClock();
 setInterval(updateClock,1000);
+document.getElementById("send").addEventListener("click", sendMessage);
+
+document.getElementById("message").addEventListener("keydown", function(e) {
+  if (e.key === "Enter") sendMessage();
+});
 statusEl.textContent="SYSTEM ONLINE";
 </script>
 </body>
