@@ -109,7 +109,15 @@ async function sendMessage(){
   });
   const data=await response.json();
   if(!response.ok)throw new Error(data.error||"Server error "+response.status);
-  const reply=data.reply||data.response||data.text;
+  if (!res.ok || data.error) {
+  throw new Error(
+    data.details
+      ? `${data.error} (HTTP ${data.status || res.status}): ${data.details}`
+      : `${data.error || "Request failed"} (HTTP ${res.status})`
+  );
+}
+
+const reply = data.reply || data.response || data.text;
   if(!reply)throw new Error("No AI response received");
   addMessage(reply,"bot");
   if(voiceEnabled&&"speechSynthesis" in window){
